@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="data:,">   <!-- Evita error 404 del favicon -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión e Investigación - Cumplir S.A.S</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/estilos.css">
+
+    <style>
+        :root {
+            --sidebar-width: 260px;
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #2980b9;
+            --bg-light: #f4f7f6;
+            --text-muted: #7f8c8d;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+            margin: 0;
+        }
+
+        /* Arquitectura del Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--primary-color);
+            position: fixed;
+            color: #ecf0f1;
+            padding-top: 1.5rem;
+            z-index: 1000;
+            border-right: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-header {
+            font-size: 1.25rem;
+            font-weight: 700;
+            text-align: center;
+            padding-bottom: 1.5rem;
+            letter-spacing: 1px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar nav {
+            margin-top: 1rem;
+        }
+
+        .sidebar a {
+            padding: 12px 25px;
+            display: flex;
+            align-items: center;
+            color: #bdc3c7;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .sidebar a i {
+            width: 25px;
+            font-size: 1.1rem;
+        }
+
+        .sidebar a:hover, .sidebar a.active {
+            background: var(--secondary-color);
+            color: #fff;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        /* Área de Contenido Principal */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .modulo {
+            display: none;
+        }
+
+        .modulo-active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Componentes de Interfaz */
+        .card {
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            background-color: #fff;
+            font-weight: 600;
+            color: var(--primary-color);
+            border-bottom: 1px solid #edf2f7;
+            padding: 1rem 1.25rem;
+        }
+
+        /* Control de Desbordamiento para Tablas */
+        .reporte-container {
+            background: #fff;
+            border-radius: 8px;
+            padding: 1rem;
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .table-custom {
+            width: 100%;
+            min-width: 1000px;
+            font-size: 0.875rem;
+        }
+
+        .table-custom thead {
+            background-color: #f8f9fa;
+        }
+
+        .form-label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--secondary-color);
+            text-transform: uppercase;
+        }
+
+        .form-control:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.2rem rgba(41, 128, 185, 0.1);
+        }
+
+        .sticky-top {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Navegación Lateral -->
+    <div class="sidebar">
+        <div class="sidebar-header">CUMPLIR S.A.S</div>
+        <nav>
+            <a onclick="verModulo('mod-gestiones')" id="nav-gestiones" class="active">
+                <i class="fas fa-search-plus"></i> INVESTIGACIÓN
+            </a>
+            <a onclick="verModulo('mod-directorio')">
+                <i class="fas fa-phone-alt"></i> DIRECTORIO
+            </a>
+            <a onclick="verModulo('mod-acuerdos')">
+                <i class="fas fa-file-contract"></i> ACUERDOS
+            </a>
+            <a onclick="verModulo('mod-resumen')">
+                <i class="fas fa-chart-pie"></i> RESUMEN OPERATIVO
+            </a>
+            <a onclick="verModulo('mod-reportes')">
+                <i class="fas fa-table"></i> REPORTE CARTERA
+            </a>
+            <hr style="opacity: 0.1;">
+            <a href="index.html" class="text-danger">
+                <i class="fas fa-sign-out-alt"></i> FINALIZAR SESIÓN
+            </a>
+            <a href="acuerdos_mensuales.html" target="_blank">
+                <i class="fas fa-calendar-alt"></i> Acuerdos Mensuales
+            </a>
+            <a href="alertas.html" class="btn btn-outline-danger btn-sm ms-2">
+                <i class="fas fa-bell"></i> Alertas
+            </a>
+        </nav>
+    </div>
+
+    <!-- Contenido -->
+    <main class="main-content">
+
+        <!-- Cabecera de Control de Datos -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0">
+                                <i class="fas fa-user-check text-muted"></i>
+                            </span>
+                            <input type="text" id="cedula_registro" class="form-control border-start-0" placeholder="Cédula del deudor activo">
+                            <button class="btn btn-secondary" onclick="buscarDatosManual()">SINCRONIZAR</button>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <span class="badge bg-light text-dark border">
+                            ENTIDAD: BANCO MUNDO MUJER
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Módulo de Investigación Técnica -->
+        <div id="mod-gestiones" class="modulo modulo-active">
+            <div class="card">
+                <div class="card-header border-start border-primary border-4">
+                    PROTOCOLO DE INVESTIGACIÓN TÉCNICA
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Entidad Salud (EPS)</label>
+                            <input type="text" id="field_eps" class="form-control">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Consulta de Bienes</label>
+                            <input type="text" id="field_bienes" class="form-control">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Registro RUES</label>
+                            <input type="text" id="field_rues" class="form-control">
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">Observaciones de Gestión Cognitiva</label>
+                            <textarea id="field_comentario" class="form-control" rows="4" placeholder="Registro detallado de la interacción..."></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Teléfono de Contacto Efectivo</label>
+                            <input type="text" id="field_telefono" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Estado de Obligación</label>
+                            <input type="text" id="field_estado_obligacion" class="form-control bg-light" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Estado del Cliente (para bitácora)</label>
+                            <select id="field_estado_cliente" class="form-select">
+                                <option value="Activo">Activo</option>
+                                <option value="Inactivo">Inactivo</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">ESTADO DE GESTIÓN</label>
+                            <select id="estado_gestion" class="form-select" onchange="cargarSubEstados()">
+                                <option value="">Seleccione...</option>
+                                <option value="Acuerdo">Acuerdo</option>
+                                <option value="ilocalizado">ilocalizado</option>
+                                <option value="juridico">juridico</option>
+                                <option value="renuente">renuente</option>
+                                <option value="paz y salvo">paz y salvo</option>
+                                <option value="localizado">localizado</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">SUBESTADO</label>
+                            <select id="subestado_gestion" class="form-select">
+                                <option value="">Seleccione estado primero</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-top">
+                        <button class="btn btn-primary px-5" onclick="guardarGestion()">
+                            REGISTRAR GESTIÓN EN SISTEMA
+                        </button>
+                    </div>
+                    <div class="mt-4">
+                        <hr>
+                        <h6 class="fw-bold">📋 HISTORIAL DE GESTIONES (Bitácora)</h6>
+                        <div id="listaBitacora" style="max-height: 300px; overflow-y: auto;">
+                            <p class="text-muted">Sincroniza un cliente para ver su historial.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Módulo: DIRECTORIO -->
+        <div id="mod-directorio" class="modulo">
+            <div class="card shadow-sm border-start border-4 border-primary">
+                <div class="card-header bg-white fw-bold">
+                    <i class="fas fa-address-book text-primary"></i> DIRECTORIO DE INVESTIGACIÓN
+                </div>
+                <div class="card-body">
+                    <!-- Formulario para agregar nuevo teléfono -->
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-4">
+                            <input type="text" id="tel_hallado" class="form-control" placeholder="Número telefónico">
+                        </div>
+                        <div class="col-md-3">
+                            <select id="estado_telefono" class="form-control">
+                                <option value="Activo">Activo</option>
+                                <option value="Inactivo">Inactivo</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select id="descripcion_telefono" class="form-control">
+                                <option value="TITULAR">TITULAR</option>
+                                <option value="CODEUDOR">CODEUDOR</option>
+                                <option value="REFERENCIA">REFERENCIA</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-primary w-100" onclick="guardarContacto()">+ AGREGAR</button>
+                        </div>
+                    </div>
+
+                    <!-- Tabla que mostrará el historial de teléfonos -->
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Teléfono</th>
+                                    <th>Estado</th>
+                                    <th>Descripción</th>
+                                    <th>Registro</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cuerpo_directorio">
+                                <tr><td colspan="5" class="text-center">Cargando...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Módulo: ACUERDOS -->
+        <div id="mod-acuerdos" class="modulo">
+            <div class="card shadow-sm border-start border-4 border-warning">
+                <div class="card-header bg-white fw-bold">
+                    <i class="fas fa-handshake text-warning"></i> NEGOCIACIÓN DE ACUERDO
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="small fw-bold">ROL</label>
+                            <select id="rol_acuerdo" class="form-select">
+                                <option value="TITULAR">TITULAR</option>
+                                <option value="CODEUDOR">CODEUDOR</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="small fw-bold">NOMBRE (según rol)</label>
+                            <input type="text" id="nombre_rol" class="form-control" placeholder="Nombre del titular o codeudor">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="small fw-bold">VALOR ACORDADO</label>
+                            <input type="number" id="monto_final" class="form-control" placeholder="$ 0.00">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="small fw-bold">NÚMERO DE CUOTAS</label>
+                            <input type="number" id="num_cuotas" class="form-control" value="1">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="small fw-bold">FECHA PRIMER PAGO</label>
+                            <input type="date" id="fecha_pago_1" class="form-control">
+                        </div>
+                        <div class="col-md-12">
+                            <label class="small fw-bold">OBSERVACIONES</label>
+                            <textarea id="comentario_acuerdo" class="form-control" rows="2" placeholder="Detalles del acuerdo..."></textarea>
+                        </div>
+                        <div class="col-md-12">
+                            <button class="btn btn-warning w-100 fw-bold" onclick="grabarAcuerdoCompleto()">GRABAR ACUERDO LEGAL</button>
+                        </div>
+                    </div>
+                    <hr class="mt-4">
+                    <h6 class="fw-bold">📜 HISTORIAL DE ACUERDOS</h6>
+                    <div id="listaAcuerdos" style="max-height: 300px; overflow-y: auto;">
+                        <p class="text-muted">Sincroniza un cliente para ver sus acuerdos.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Módulo de Resumen Operativo -->
+        <div id="mod-resumen" class="modulo">
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <i class="fas fa-chart-line"></i> RESUMEN OPERATIVO
+                </div>
+                <div class="card-body">
+                    <!-- Estadísticas generales -->
+                    <div class="row text-center mb-4">
+                        <div class="col-md-3">
+                            <div class="card bg-light border-0">
+                                <div class="card-body">
+                                    <h6 class="text-muted">Saldo Capital</h6>
+                                    <h4 id="res_saldo_capital" class="text-primary">$0</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-light border-0">
+                                <div class="card-body">
+                                    <h6 class="text-muted">Saldo Total</h6>
+                                    <h4 id="res_saldo_total" class="text-primary">$0</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="card bg-light border-0">
+                                <div class="card-body">
+                                    <h6 class="text-muted">Gestiones</h6>
+                                    <h4 id="res_total_gestiones" class="text-success">0</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="card bg-light border-0">
+                                <div class="card-body">
+                                    <h6 class="text-muted">Teléfonos</h6>
+                                    <h4 id="res_total_telefonos" class="text-success">0</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="card bg-light border-0">
+                                <div class="card-body">
+                                    <h6 class="text-muted">Acuerdos</h6>
+                                    <h4 id="res_total_acuerdos" class="text-success">0</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pestañas -->
+                    <ul class="nav nav-tabs" id="resumenTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab">📋 Resumen</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="gestiones-tab" data-bs-toggle="tab" data-bs-target="#gestiones" type="button" role="tab">📞 Gestiones</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="telefonos-tab" data-bs-toggle="tab" data-bs-target="#telefonos" type="button" role="tab">📱 Teléfonos</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="acuerdos-tab" data-bs-toggle="tab" data-bs-target="#acuerdos" type="button" role="tab">📄 Acuerdos</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="estado-tab" data-bs-toggle="tab" data-bs-target="#estado" type="button" role="tab">⚙️ Estado</button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content mt-3">
+                        <!-- Panel Resumen -->
+                        <div class="tab-pane fade show active" id="info" role="tabpanel">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">ROL</label>
+                                    <input type="text" id="res_rol" class="form-control" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">CC</label>
+                                    <input type="text" id="res_cc" class="form-control" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">NOMBRE</label>
+                                    <input type="text" id="res_nombre" class="form-control" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">CANAL COMUNICACIÓN</label>
+                                    <input type="text" id="res_canal" class="form-control" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">TELÉFONO</label>
+                                    <input type="text" id="res_telefono" class="form-control" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">SI CONTACTO O NO</label>
+                                    <input type="text" id="res_contacto" class="form-control" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">ACUERDO SI O NO</label>
+                                    <input type="text" id="res_acuerdo" class="form-control" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">NÚMERO DE CUOTAS</label>
+                                    <input type="text" id="res_cuotas" class="form-control" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">VALOR CRÉDITO</label>
+                                    <input type="text" id="res_valor_credito" class="form-control" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">VALOR NEGOCIADO</label>
+                                    <input type="text" id="res_valor_negociado" class="form-control" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">VALOR CONDONADO</label>
+                                    <input type="text" id="res_valor_condonado" class="form-control" readonly>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Panel Gestiones -->
+                        <div class="tab-pane fade" id="gestiones" role="tabpanel">
+                            <div id="lista_gestiones_resumen" style="max-height: 300px; overflow-y: auto;">
+                                <p class="text-muted">Sincroniza un cliente para ver sus gestiones.</p>
+                            </div>
+                        </div>
+
+                        <!-- Panel Teléfonos -->
+                        <div class="tab-pane fade" id="telefonos" role="tabpanel">
+                            <div id="lista_telefonos_resumen" style="max-height: 300px; overflow-y: auto;">
+                                <p class="text-muted">Sincroniza un cliente para ver sus teléfonos.</p>
+                            </div>
+                        </div>
+
+                        <!-- Panel Acuerdos -->
+                        <div class="tab-pane fade" id="acuerdos" role="tabpanel">
+                            <div id="lista_acuerdos_resumen" style="max-height: 300px; overflow-y: auto;">
+                                <p class="text-muted">Sincroniza un cliente para ver sus acuerdos.</p>
+                            </div>
+                        </div>
+
+                        <!-- Panel Estado -->
+                        <div class="tab-pane fade" id="estado" role="tabpanel">
+                            <div id="lista_estado_resumen" style="max-height: 300px; overflow-y: auto;">
+                                <p class="text-muted">Sincroniza un cliente para ver el historial de estados.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+   
+        <!-- Módulo de Resumen Operativo -->
+        <div id="mod-resumen" class="modulo">
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <i class="fas fa-chart-line"></i> RESUMEN OPERATIVO
+                </div>
+                <div class="card-body">
+                    <!-- Estadísticas generales -->
+                    <div class="row text-center mb-4">
+                        <div class="col-md-3">
+                            <div class="card bg-light border-0">
+                                <div class="card-body">
+                                    <h6 class="text-muted">Saldo Capital</h6>
+                                    <h4 id="res_saldo_capital" class="text-primary">$0</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-light border-0">
+                                <div class="card-body">
+                                    <h6 class="text-muted">Saldo Total</h6>
+                                    <h4 id="res_saldo_total" class="text-primary">$0</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="card bg-light border-0">
+                                <div class="card-body">
+                                    <h6 class="text-muted">Gestiones</h6>
+                                    <h4 id="res_total_gestiones" class="text-success">0</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="card bg-light border-0">
+                                <div class="card-body">
+                                    <h6 class="text-muted">Teléfonos</h6>
+                                       <h4 id="res_total_telefonos" class="text-success">0</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="card bg-light border-0">
+                                <div class="card-body">
+                                    <h6 class="text-muted">Acuerdos</h6>
+                                    <h4 id="res_total_acuerdos" class="text-success">0</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pestañas para ver los últimos registros -->
+                    <ul class="nav nav-tabs" id="resumenTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab">📋 Resumen</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="gestiones-tab" data-bs-toggle="tab" data-bs-target="#gestiones" type="button" role="tab">📞 Gestiones</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="telefonos-tab" data-bs-toggle="tab" data-bs-target="#telefonos" type="button" role="tab">📱 Teléfonos</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="acuerdos-tab" data-bs-toggle="tab" data-bs-target="#acuerdos" type="button" role="tab">📄 Acuerdos</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="estado-tab" data-bs-toggle="tab" data-bs-target="#estado" type="button" role="tab">⚙️ Estado</button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content mt-3">
+                        <!-- Pestaña Resumen (información consolidada) -->
+                        <div class="tab-pane fade show active" id="info" role="tabpanel">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">ROL</label>
+                                    <input type="text" id="res_rol" class="form-control" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">CC</label>
+                                    <input type="text" id="res_cc" class="form-control" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">NOMBRE</label>
+                                    <input type="text" id="res_nombre" class="form-control" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">CANAL COMUNICACIÓN</label>
+                                    <input type="text" id="res_canal" class="form-control" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">TELÉFONO</label>
+                                    <input type="text" id="res_telefono" class="form-control" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">SI CONTACTO O NO</label>
+                                    <input type="text" id="res_contacto" class="form-control" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">ACUERDO SI O NO</label>
+                                    <input type="text" id="res_acuerdo" class="form-control" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">NÚMERO DE CUOTAS</label>
+                                    <input type="text" id="res_cuotas" class="form-control" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">VALOR CRÉDITO</label>
+                                    <input type="text" id="res_valor_credito" class="form-control" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">VALOR NEGOCIADO</label>
+                                    <input type="text" id="res_valor_negociado" class="form-control" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">VALOR CONDONADO</label>
+                                    <input type="text" id="res_valor_condonado" class="form-control" readonly>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pestaña Gestiones (últimas 5) -->
+                        <div class="tab-pane fade" id="gestiones" role="tabpanel">
+                            <div id="lista_gestiones_resumen" style="max-height: 300px; overflow-y: auto;">
+                                <p class="text-muted">Sincroniza un cliente para ver sus gestiones.</p>
+                            </div>
+                        </div>
+
+                        <!-- Pestaña Teléfonos (últimos 5) -->
+                        <div class="tab-pane fade" id="telefonos" role="tabpanel">
+                            <div id="lista_telefonos_resumen" style="max-height: 300px; overflow-y: auto;">
+                                <p class="text-muted">Sincroniza un cliente para ver sus teléfonos.</p>
+                            </div>
+                        </div>
+
+                        <!-- Pestaña Acuerdos (últimos 5) -->
+                        <div class="tab-pane fade" id="acuerdos" role="tabpanel">
+                            <div id="lista_acuerdos_resumen" style="max-height: 300px; overflow-y: auto;">
+                                <p class="text-muted">Sincroniza un cliente para ver sus acuerdos.</p>
+                            </div>
+                        </div>
+
+                        <!-- Pestaña Estado (historial de estados y subestados) -->
+                        <div class="tab-pane fade" id="estado" role="tabpanel">
+                            <div id="lista_estado_resumen" style="max-height: 300px; overflow-y: auto;">
+                                <p class="text-muted">Sincroniza un cliente para ver el historial de estados.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Módulo de Reportes Detallados -->
+        <div id="mod-reportes" class="modulo">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-chart-line"></i> REPORTE DE CARTERA</span>
+                    <div class="input-group w-50">
+                        <input type="text" id="reporte_buscar" class="form-control form-control-sm" placeholder="Buscar por cédula o nombre...">
+                        <button class="btn btn-sm btn-outline-light" onclick="filtrarReporte()">Buscar</button>
+                        <button class="btn btn-sm btn-outline-light" onclick="cargarReporteGeneral()">Actualizar</button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <!-- Filtros -->
+                    <div class="row p-3 bg-light border-bottom g-2">
+                        <div class="col-md-2">
+                            <label class="form-label">Estado</label>
+                            <select id="filtro_estado" class="form-select form-select-sm">
+                                <option value="">Todos</option>
+                                <option value="ACTIVA">ACTIVA</option>
+                                <option value="EN_ACUERDO">EN ACUERDO</option>
+                                <option value="PAGADA">PAGADA</option>
+                                <option value="CASTIGADA">CASTIGADA</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Días mora (mín)</label>
+                            <input type="number" id="filtro_mora_min" class="form-control form-control-sm" placeholder="0">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Días mora (máx)</label>
+                            <input type="number" id="filtro_mora_max" class="form-control form-control-sm" placeholder="9999">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Fecha campaña (desde)</label>
+                            <input type="date" id="filtro_fecha_inicio" class="form-control form-control-sm">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Fecha campaña (hasta)</label>
+                            <input type="date" id="filtro_fecha_fin" class="form-control form-control-sm">
+                        </div>
+                        <div class="col-md-2 d-flex gap-1">
+                            <button class="btn btn-primary btn-sm w-100" onclick="aplicarFiltros()">Aplicar</button>
+                            <button class="btn btn-secondary btn-sm w-100" onclick="limpiarFiltros()">Limpiar</button>
+                        </div>
+                    </div>
+                    <div class="table-responsive" style="max-height: 70vh; overflow-y: auto;">
+                        <table class="table table-hover table-sm mb-0">
+                            <thead class="table-dark sticky-top">
+                                <tr>
+                                    <th>Cédula</th>
+                                    <th>Nombre</th>
+                                    <th>Rol</th>
+                                    <th>Obligación</th>
+                                    <th>Saldo Total</th>
+                                    <th>Días Mora</th>
+                                    <th>Estado</th>
+                                    <th>Subestado</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla_reporte_body">
+                                <tr><td colspan="8" class="text-center">Cargando datos...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+
+<script>
+    // ==========================================
+    // VERIFICACIÓN DE SESIÓN
+    // ==========================================
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+        window.location.href = '/login.html';
+    }
+
+    // ==========================================
+    // FUNCIONES AUXILIARES
+    // ==========================================
+    function formatMoney(amount) {
+        if (amount === undefined || amount === null) return '0';
+        return amount.toLocaleString('es-CO', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    }
+
+    function getAsesorId() {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        return user.id || 1;
+    }
+
+    // ==========================================
+    // VARIABLES GLOBALES (una sola declaración)
+    // ==========================================
+    let reporteData = [];
+    let currentFilters = {
+        estado: '',
+        mora_min: '',
+        mora_max: '',
+        fecha_inicio: '',
+        fecha_fin: ''
+    };
+
+    // ==========================================
+    // SINCRONIZAR DATOS DEL DEUDOR
+    // ==========================================
+    async function buscarDatosManual() {
+        const input = document.getElementById('cedula_registro');
+        const cedula = input.value.trim();
+        if (!cedula) {
+            alert("Por favor, ingresa una cédula.");
+            return;
+        }
+
+        try {
+            // 1. Último registro (campos de edición)
+            const respHist = await fetch(`/historial/${cedula}`);
+            const dataHist = await respHist.json();
+            const inv = dataHist.investigacion || {};
+
+            document.getElementById('field_eps').value = inv.eps || "";
+            document.getElementById('field_bienes').value = inv.bienes || "";
+            document.getElementById('field_rues').value = inv.rues || "";
+            document.getElementById('field_comentario').value = inv.observacion || "";
+            document.getElementById('field_telefono').value = inv.telefono || "";
+
+            const estadoObl = document.getElementById('field_estado_obligacion');
+            if (estadoObl) estadoObl.value = inv.estado_obligacion || "MORA ACTIVA";
+
+            // 2. Bitácora (historial de gestiones)
+            const respBitacora = await fetch(`/bitacora/${cedula}`);
+            const dataBit = await respBitacora.json();
+            const contenedor = document.getElementById('listaBitacora');
+            if (contenedor) {
+                if (dataBit.status === "success" && dataBit.bitacora.length > 0) {
+                    let html = `<div class="list-group">`;
+                    dataBit.bitacora.forEach(reg => {
+                        const fecha = new Date(reg.fecha_actualizacion).toLocaleString('es-CO');
+                        const estadoCliente = reg.estado_cliente || 'Activo';
+                        const badgeClass = estadoCliente === 'Activo' ? 'bg-success' : 'bg-secondary';
+                        html += `
+                            <div class="list-group-item list-group-item-action mb-2 rounded border-start border-3 border-info">
+                                <div class="d-flex w-100 justify-content-between align-items-center">
+                                    <small class="text-muted">${fecha}</small>
+                                    <div>
+                                        <span class="badge ${badgeClass} me-1">${estadoCliente}</span>
+                                        <span class="badge bg-secondary">ID: ${reg.id}</span>
+                                    </div>
+                                </div>
+                                <p class="mb-1"><strong>EPS:</strong> ${reg.eps || '—'}</p>
+                                <p class="mb-1"><strong>Bienes:</strong> ${reg.bienes || '—'}</p>
+                                <p class="mb-1"><strong>RUES:</strong> ${reg.rues || '—'}</p>
+                                <p class="mb-1"><strong>Teléfono:</strong> ${reg.telefono || '—'}</p>
+                                <p class="mb-0"><strong>Observación:</strong> ${reg.observacion || '—'}</p>
+                            </div>
+                        `;
+                    });
+                    html += `</div>`;
+                    contenedor.innerHTML = html;
+                } else {
+                    contenedor.innerHTML = '<p class="text-muted">No hay registros en la bitácora para este cliente.</p>';
+                }
+            }
+
+            // 3. Directorio (teléfonos)
+            cargarDirectorio(cedula);
+            // 4. Acuerdos
+            cargarAcuerdos(cedula);
+            // 5. Resumen operativo
+            cargarResumen(cedula);
+
+            alert("Sincronización exitosa");
+        } catch (error) {
+            console.error("Error técnico:", error);
+            alert("No se pudo conectar con el servidor.");
+        }
+    }
+
+    // ==========================================
+    // GUARDAR GESTIÓN (INVESTIGACIÓN)
+    // ==========================================
+    async function guardarGestion() {
+        const cedula = document.getElementById('cedula_registro').value.trim();
+        if (!cedula) {
+            alert("Primero sincroniza un deudor.");
+            return;
+        }
+
+        const payload = {
+            cedula: cedula,
+            eps: document.getElementById('field_eps').value,
+            bienes: document.getElementById('field_bienes').value,
+            rues: document.getElementById('field_rues').value,
+            comentario: document.getElementById('field_comentario').value,
+            telefono: document.getElementById('field_telefono').value,
+            estado_cliente: document.getElementById('field_estado_cliente').value,
+            estado: document.getElementById('estado_gestion').value,
+            subestado: document.getElementById('subestado_gestion').value
+        };
+
+        try {
+            const response = await fetch('/registrar_gestion_completa', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const result = await response.json();
+
+            if (response.ok && result.status === "success") {
+                alert("Bitácora registrada correctamente.");
+                document.getElementById('field_comentario').value = "";
+                document.getElementById('field_telefono').value = "";
+                document.getElementById('estado_gestion').value = "";
+                document.getElementById('subestado_gestion').innerHTML = '<option value="">Seleccione estado primero</option>';
+                buscarDatosManual();
+            } else {
+                alert("Error: " + (result.message || result.error));
+            }
+        } catch (error) {
+            console.error('Error de red:', error);
+            alert("Error de conexión con el servidor.");
+        }
+    }
+
+    // ==========================================
+    // DIRECTORIO (Teléfonos)
+    // ==========================================
+    async function cargarDirectorio(cedula) {
+        if (!cedula) return;
+        try {
+            const resp = await fetch(`/telefonos/${cedula}`);
+            const data = await resp.json();
+            const tbody = document.getElementById('cuerpo_directorio');
+            if (!tbody) return;
+
+            tbody.innerHTML = "";
+            if (data.telefonos && data.telefonos.length > 0) {
+                data.telefonos.forEach(tel => {
+                    const fecha = new Date(tel.fecha_registro).toLocaleString('es-CO');
+                    const fila = document.createElement('tr');
+                    fila.innerHTML = `
+                         <td>${tel.id}</td>
+                         <td>${tel.numero}</td>
+                         <td><span class="badge ${tel.estado === 'Activo' ? 'bg-success' : 'bg-secondary'}">${tel.estado}</span></td>
+                         <td>${tel.descripcion || '—'}</td>
+                         <td><small>${fecha}</small></td>
+                    `;
+                    tbody.appendChild(fila);
+                });
+            } else {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center">No hay teléfonos registrados</td></tr>';
+            }
+        } catch (error) {
+            console.error("Error cargando directorio:", error);
+            const tbody = document.getElementById('cuerpo_directorio');
+            if (tbody) tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error de conexión</td></tr>';
+        }
+    }
+
+    async function guardarContacto() {
+        const cedula = document.getElementById('cedula_registro').value.trim();
+        if (!cedula) {
+            alert("Primero sincroniza un deudor.");
+            return;
+        }
+        const numero = document.getElementById('tel_hallado').value.trim();
+        const estado = document.getElementById('estado_telefono').value;
+        const descripcion = document.getElementById('descripcion_telefono').value;
+
+        if (!numero) {
+            alert("Escribe un número de teléfono.");
+            return;
+        }
+
+        try {
+            const resp = await fetch('/registrar_telefono', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    cedula: cedula,
+                    numero: numero,
+                    estado: estado,
+                    descripcion: descripcion
+                })
+            });
+            const result = await resp.json();
+            if (result.status === "success") {
+                alert("Teléfono guardado correctamente.");
+                document.getElementById('tel_hallado').value = "";
+                cargarDirectorio(cedula);
+            } else {
+                alert("Error: " + result.message);
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Error de conexión.");
+        }
+    }
+
+    // ==========================================
+    // ACUERDOS
+    // ==========================================
+    async function cargarAcuerdos(cedula) {
+        if (!cedula) return;
+        try {
+            const resp = await fetch(`/acuerdos/${cedula}`);
+            const data = await resp.json();
+            const contenedor = document.getElementById('listaAcuerdos');
+            if (!contenedor) return;
+
+            if (data.status === "success" && data.acuerdos.length > 0) {
+                let html = `<div class="list-group">`;
+                data.acuerdos.forEach(ac => {
+                    const fecha = new Date(ac.fecha_registro).toLocaleString('es-CO');
+                    const fechaPago = new Date(ac.fecha_primera_cuota).toLocaleDateString('es-CO');
+                    html += `
+                        <div class="list-group-item list-group-item-action mb-2 rounded border-start border-3 border-warning">
+                            <div class="d-flex w-100 justify-content-between">
+                                <small class="text-muted">${fecha}</small>
+                                <span class="badge bg-warning text-dark">ID: ${ac.acuerdo_id}</span>
+                            </div>
+                            <p class="mb-1"><strong>Rol:</strong> ${ac.rol} - <strong>Nombre:</strong> ${ac.nombre_rol}</p>
+                            <p class="mb-1"><strong>Monto:</strong> $${ac.monto_acordado.toLocaleString()} - <strong>Cuotas:</strong> ${ac.numero_cuotas} ($${ac.valor_cuota.toLocaleString()} c/u)</p>
+                            <p class="mb-1"><strong>Primer pago:</strong> ${fechaPago}</p>
+                            <p class="mb-0"><strong>Comentario:</strong> ${ac.comentario || '—'}</p>
+                            <p class="mb-0 text-muted small"><strong>Asesor:</strong> ${ac.asesor_nombre || ac.asesor_id || '—'}</p>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+                contenedor.innerHTML = html;
+            } else {
+                contenedor.innerHTML = '<p class="text-muted">No hay acuerdos registrados para este cliente.</p>';
+            }
+        } catch (error) {
+            console.error("Error cargando acuerdos:", error);
+            const contenedor = document.getElementById('listaAcuerdos');
+            if (contenedor) contenedor.innerHTML = '<p class="text-danger">Error al cargar historial.</p>';
+        }
+    }
+
+    async function grabarAcuerdoCompleto() {
+        const cedula = document.getElementById('cedula_registro').value.trim();
+        if (!cedula) {
+            alert("Primero sincroniza un deudor.");
+            return;
+        }
+
+        const rol = document.getElementById('rol_acuerdo').value;
+        const nombre_rol = document.getElementById('nombre_rol').value.trim();
+        const monto = parseFloat(document.getElementById('monto_final').value);
+        const cuotas = parseInt(document.getElementById('num_cuotas').value);
+        const fechaPago = document.getElementById('fecha_pago_1').value;
+        const comentario = document.getElementById('comentario_acuerdo').value.trim();
+
+        if (!nombre_rol || !monto || !cuotas || !fechaPago) {
+            alert("Complete todos los campos del acuerdo.");
+            return;
+        }
+
+        const payload = {
+            cedula_cliente: cedula,
+            rol: rol,
+            nombre_rol: nombre_rol,
+            monto_negociado: monto,
+            cuotas: cuotas,
+            fecha_inicio: fechaPago,
+            asesor_id: getAsesorId(),
+            comentario: comentario || "Acuerdo registrado"
+        };
+
+        try {
+            const resp = await fetch('/crear_acuerdo_completo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await resp.json();
+
+            if (resp.ok && data.status === "success") {
+                alert("Acuerdo guardado exitosamente.");
+                document.getElementById('nombre_rol').value = "";
+                document.getElementById('monto_final').value = "";
+                document.getElementById('num_cuotas').value = "1";
+                document.getElementById('fecha_pago_1').value = "";
+                document.getElementById('comentario_acuerdo').value = "";
+                cargarAcuerdos(cedula);
+                if (confirm("¿Deseas generar el documento PDF?")) {
+                    window.open(`/descargar_acuerdo/${cedula}`, '_blank');
+                }
+            } else {
+                alert("Error: " + (data.detail || data.message));
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Error de conexión.");
+        }
+    }
+
+    // ==========================================
+    // RESUMEN OPERATIVO
+    // ==========================================
+    async function cargarResumen(cedula) {
+        if (!cedula) return;
+        try {
+            const resp = await fetch(`/resumen/${cedula}`);
+            const data = await resp.json();
+            if (data.status === "success") {
+                const r = data.data;
+
+                document.getElementById('res_saldo_capital').innerText = formatMoney(r.saldo_capital);
+                document.getElementById('res_saldo_total').innerText = formatMoney(r.saldo_total);
+                document.getElementById('res_total_gestiones').innerText = r.total_gestiones;
+                document.getElementById('res_total_telefonos').innerText = r.total_telefonos;
+                document.getElementById('res_total_acuerdos').innerText = r.total_acuerdos;
+
+                document.getElementById('res_rol').value = r.rol || '';
+                document.getElementById('res_cc').value = r.cc || '';
+                document.getElementById('res_nombre').value = r.nombre || '';
+                document.getElementById('res_canal').value = r.canal || '';
+                document.getElementById('res_telefono').value = r.telefono || '';
+                document.getElementById('res_contacto').value = r.contacto || '';
+                document.getElementById('res_acuerdo').value = r.acuerdo || '';
+                document.getElementById('res_cuotas').value = r.cuotas || 0;
+                document.getElementById('res_valor_credito').value = formatMoney(r.valor_credito);
+                document.getElementById('res_valor_negociado').value = formatMoney(r.valor_negociado);
+                document.getElementById('res_valor_condonado').value = formatMoney(r.valor_condonado);
+            }
+        } catch (error) {
+            console.error("Error cargando resumen:", error);
+        }
+    }
+
+    // ==========================================
+    // REPORTE CARTERA (con filtros)
+    // ==========================================
+    async function cargarReporteGeneral() {
+        let url = '/obtener_reporte_general?';
+        const params = [];
+        if (currentFilters.estado) params.push(`estado=${encodeURIComponent(currentFilters.estado)}`);
+        if (currentFilters.mora_min !== '') params.push(`mora_min=${currentFilters.mora_min}`);
+        if (currentFilters.mora_max !== '') params.push(`mora_max=${currentFilters.mora_max}`);
+        if (currentFilters.fecha_inicio) params.push(`fecha_inicio=${currentFilters.fecha_inicio}`);
+        if (currentFilters.fecha_fin) params.push(`fecha_fin=${currentFilters.fecha_fin}`);
+        url += params.join('&');
+
+        const tbody = document.getElementById('tabla_reporte_body');
+        if (!tbody) return;
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center">Cargando datos...</td></tr>';
+        try {
+            const resp = await fetch(url);
+            const data = await resp.json();
+            if (data.status === "success") {
+                reporteData = data.datos;
+                renderReporte(reporteData);
+            } else {
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center text-danger">Error: ${data.message}</td></tr>`;
+            }
+        } catch (error) {
+            console.error("Error cargando reporte:", error);
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center text-danger">Error de conexión</td></tr>';
+        }
+    }
+
+    function renderReporte(datos) {
+        const tbody = document.getElementById('tabla_reporte_body');
+        if (!tbody) return;
+        if (datos.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center">No se encontraron registros</td></tr>';
+            return;
+        }
+        let html = '';
+        datos.forEach(row => {
+            html += `
+                <tr>
+                    <td>${row.cedula}</td>
+                    <td>${row.nombre || '—'}</td>
+                    <td>${row.rol || '—'}</td>
+                    <td>${row.credito || '—'}</td>
+                    <td class="text-end">${row.saldo}</td>
+                    <td class="text-center">${row.dias || 0}</td>
+                    <td>${row.estado || '—'}</td>
+                    <td>${row.subestado || '—'}</td>
+                </tr>
+            `;
+        });
+        tbody.innerHTML = html;
+    }
+
+    function aplicarFiltros() {
+        currentFilters.estado = document.getElementById('filtro_estado').value;
+        currentFilters.mora_min = document.getElementById('filtro_mora_min').value;
+        currentFilters.mora_max = document.getElementById('filtro_mora_max').value;
+        currentFilters.fecha_inicio = document.getElementById('filtro_fecha_inicio').value;
+        currentFilters.fecha_fin = document.getElementById('filtro_fecha_fin').value;
+        cargarReporteGeneral();
+    }
+
+    function limpiarFiltros() {
+        document.getElementById('filtro_estado').value = '';
+        document.getElementById('filtro_mora_min').value = '';
+        document.getElementById('filtro_mora_max').value = '';
+        document.getElementById('filtro_fecha_inicio').value = '';
+        document.getElementById('filtro_fecha_fin').value = '';
+        aplicarFiltros();
+    }
+
+    function filtrarReporte() {
+        const texto = document.getElementById('reporte_buscar').value.trim().toLowerCase();
+        if (!texto) {
+            renderReporte(reporteData);
+            return;
+        }
+        const filtrados = reporteData.filter(row =>
+            (row.cedula && row.cedula.toLowerCase().includes(texto)) ||
+            (row.nombre && row.nombre.toLowerCase().includes(texto))
+        );
+        renderReporte(filtrados);
+    }
+
+    // ==========================================
+    // ESTADOS Y SUBESTADOS (dinámico)
+    // ==========================================
+    function cargarSubEstados() {
+        const estado = document.getElementById('estado_gestion').value;
+        const subSelect = document.getElementById('subestado_gestion');
+        subSelect.innerHTML = '<option value="">Seleccione...</option>';
+
+        const opciones = {
+            'Acuerdo': ['Acuerdo de pago', 'Acuerdo incumplido'],
+            'ilocalizado': ['Ilocalizado'],
+            'juridico': ['Juridico'],
+            'renuente': ['Fallecido', 'No contesta', 'Insolbente'],
+            'paz y salvo': ['Paz y salvo'],
+            'localizado': ['Localizado']
+        };
+
+        if (opciones[estado]) {
+            opciones[estado].forEach(opt => {
+                const option = document.createElement('option');
+                option.value = opt;
+                option.textContent = opt;
+                subSelect.appendChild(option);
+            });
+        }
+    }
+
+    // ==========================================
+    // CAMBIO DE MÓDULOS (menú lateral)
+    // ==========================================
+    function verModulo(id) {
+        document.querySelectorAll('.modulo').forEach(mod => {
+            mod.style.display = 'none';
+            mod.classList.remove('modulo-active');
+        });
+        const modulo = document.getElementById(id);
+        if (modulo) {
+            modulo.style.display = 'block';
+            modulo.classList.add('modulo-active');
+        }
+        document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
+        const link = document.querySelector(`a[onclick*="${id}"]`);
+        if (link) link.classList.add('active');
+
+        if (id === 'mod-reportes' && typeof cargarReporteGeneral === 'function') {
+            cargarReporteGeneral();
+        }
+    }
+
+    // ==========================================
+    // INICIALIZACIÓN
+    // ==========================================
+    document.addEventListener('DOMContentLoaded', () => {
+        const cedulaActiva = localStorage.getItem('cedula_activa');
+        if (cedulaActiva) {
+            document.getElementById('cedula_registro').value = cedulaActiva;
+            buscarDatosManual();
+        }
+        verModulo('mod-gestiones');
+
+        // Inicializar pestañas de Bootstrap (por si acaso)
+        var triggerTabList = [].slice.call(document.querySelectorAll('#resumenTab button'));
+        triggerTabList.forEach(function (triggerEl) {
+            var tabTrigger = new bootstrap.Tab(triggerEl);
+            triggerEl.addEventListener('click', function (event) {
+                event.preventDefault();
+                tabTrigger.show();
+            });
+        });
+    });
+</script>
+
+
+</body>
+</html>

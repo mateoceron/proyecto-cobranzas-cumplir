@@ -1,0 +1,22 @@
+services:
+  # PostgreSQL: El corazón relacional (ACID) para finanzas
+  postgres_db:
+    image: postgres:14.2
+    restart: always
+    environment:
+      POSTGRES_USER: admin_mujer
+      POSTGRES_PASSWORD: password_seguro
+      POSTGRES_DB: cobranzas_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+
+  # MongoDB: Para historiales, eventos de IA y datos no estructurados
+  mongo_db:
+    image: mongo:latest
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./mongo_data:/data/db

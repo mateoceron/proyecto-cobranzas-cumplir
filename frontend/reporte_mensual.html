@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="data:,">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte Mensual - Cumplir S.A.S</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/estilos.css">
+    <style>
+        body { background-color: #f4f6f9; }
+        .card-header { background-color: #2c3e50; color: white; }
+        .table-responsive { max-height: 500px; overflow-y: auto; }
+        .sticky-header th { position: sticky; top: 0; background-color: #343a40; color: white; z-index: 10; }
+    </style>
+</head>
+<body>
+    <div class="container-fluid mt-3">
+        <div class="card shadow">
+            <div class="card-header">
+                <h4><i class="fas fa-chart-bar"></i> Reporte de Gestión Mensual</h4>
+            </div>
+            <div class="card-body">
+                <!-- Filtros -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label">Seleccionar mes</label>
+                        <input type="month" id="mes" class="form-control">
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button class="btn btn-primary w-100" onclick="generarReporte()">
+                            <i class="fas fa-save"></i> Generar y Guardar
+                        </button>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button class="btn btn-secondary w-100" onclick="cargarReporte()">
+                            <i class="fas fa-eye"></i> Ver Reporte Guardado
+                        </button>
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-md-12">
+                        <h5>Reportes Guardados</h5>
+                        <select id="select_meses" class="form-select" onchange="cargarReporte()">
+                            <option value="">Seleccione un mes</option>
+                        </select>
+                    </div>
+                </div>
+                <hr>
+
+                <!-- Resumen Global -->
+                <div id="resumen_global" class="row text-center mb-4" style="display: none;">
+                    <div class="col-md-3">
+                        <div class="card bg-light border-0">
+                            <div class="card-body">
+                                <h6 class="text-muted">Total Gestiones</h6>
+                                <h4 id="total_gestiones" class="text-primary">0</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-light border-0">
+                            <div class="card-body">
+                                <h6 class="text-muted">Total Acuerdos</h6>
+                                <h4 id="total_acuerdos" class="text-primary">0</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-light border-0">
+                            <div class="card-body">
+                                <h6 class="text-muted">Total Pagos</h6>
+                                <h4 id="total_pagos" class="text-primary">$0</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-light border-0">
+                            <div class="card-body">
+                                <h6 class="text-muted">Fecha Generación</h6>
+                                <h6 id="fecha_gen" class="text-muted">—</h6>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabla de Ranking por Asesor -->
+                <div id="tabla_asesores" style="display: none;">
+                    <h5>Ranking de Asesores</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm">
+                            <thead class="sticky-header">
+                                <tr>
+                                    <th>Asesor</th>
+                                    <th>Gestiones</th>
+                                    <th>Posición Gestiones</th>
+                                    <th>Acuerdos</th>
+                                    <th>Posición Acuerdos</th>
+                                    <th>Monto Acuerdos</th>
+                                    <th>Posición Monto</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla_asesores_body">
+                                <!-- datos dinámicos -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="sin_reporte" class="alert alert-info text-center" style="display: none;">
+                    No hay reporte guardado para este mes. Genera uno nuevo.
+                </div>
+            </div>
+        </div>
+        <div class="mt-3 text-center">
+            <a href="index.html" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Volver al Inicio</a>
+        </div>
+    </div>
+
+<script>
+
+const token = localStorage.getItem('access_token');
+if (!token) {
+    window.location.href = '/login.html';
+}
+
+        // Cargar la lista de meses con reportes guardados
+        async function cargarListaMeses() {
+            try {
+                const resp = await fetch('/reportes_mensuales');
+                const data = await resp.json();
+                if (data.status === 'success' && data.reportes) {
+                    const select = document.getElementById('select_meses');
+                    select.innerHTML = '<option value="">Seleccione un mes</option>';
+                    data.reportes.forEach(r => {
+                        const fecha = new Date(r.mes);
+                        const mesStr = `${fecha.getFullYear()}-${String(fecha.getMonth()+1).padStart(2,'0')}`;
+                        const option = document.createElement('option');
+                        option.value = mesStr;
+                        option.textContent = mesStr;
+                        select.appendChild(option);
+                    });
+                }
+            } catch (e) {
+                console.error('Error cargando meses:', e);
+            }
+        }
+
+        // Generar reporte para el mes seleccionado
+        async function generarReporte() {
+            const mes = document.getElementById('mes').value;
+            if (!mes) {
+                alert('Selecciona un mes');
+                return;
+            }
+            try {
+                const resp = await fetch(`/generar_reporte_mensual?mes=${mes}`, { method: 'POST' });
+                const data = await resp.json();
+                if (data.status === 'success') {
+                    alert('Reporte generado y guardado exitosamente');
+                    cargarListaMeses(); // refrescar el dropdown
+                    // Opcional: mostrar el reporte recién generado
+                    cargarReportePorMes(mes);
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (e) {
+                alert('Error de conexión');
+            }
+        }
+
+        // Cargar reporte del mes seleccionado en el dropdown
+        async function cargarReporte() {
+            const mes = document.getElementById('select_meses').value;
+            if (!mes) return;
+            cargarReportePorMes(mes);
+        }
+
+        async function cargarReportePorMes(mes) {
+            try {
+                const resp = await fetch(`/reportes_mensuales?mes=${mes}`);
+                const data = await resp.json();
+                if (data.status === 'success') {
+                    if (data.reporte) {
+                        // Mostrar resumen global
+                        document.getElementById('resumen_global').style.display = 'flex';
+                        document.getElementById('tabla_asesores').style.display = 'block';
+                        document.getElementById('sin_reporte').style.display = 'none';
+                        const r = data.reporte;
+                        document.getElementById('total_gestiones').innerText = r.total_gestiones;
+                        document.getElementById('total_acuerdos').innerText = r.total_acuerdos;
+                        document.getElementById('total_pagos').innerText = '$' + formatMoney(r.total_pagos);
+                        const fechaGen = new Date(r.fecha_generacion).toLocaleString('es-CO');
+                        document.getElementById('fecha_gen').innerText = fechaGen;
+
+                        // Mostrar tabla de asesores
+                        const tbody = document.getElementById('tabla_asesores_body');
+                        tbody.innerHTML = '';
+                        if (data.asesores && data.asesores.length > 0) {
+                            data.asesores.forEach(a => {
+                                const tr = document.createElement('tr');
+                                tr.innerHTML = `
+                                    <td>${a.asesor_nombre || 'Sin asesor'} </td>
+                                     <td class="text-center">${a.total_gestiones} </td>
+                                     <td class="text-center">${a.posicion_gestiones} </td>
+                                     <td class="text-center">${a.total_acuerdos} </td>
+                                     <td class="text-center">${a.posicion_acuerdos} </td>
+                                     <td class="text-end">$${formatMoney(a.monto_acuerdos)} </td>
+                                     <td class="text-center">${a.posicion_monto} </td>
+                                `;
+                                tbody.appendChild(tr);
+                            });
+                        } else {
+                            tbody.innerHTML = '<tr><td colspan="7" class="text-center">No hay datos de asesores para este mes</td></tr>';
+                        }
+                    } else {
+                        document.getElementById('resumen_global').style.display = 'none';
+                        document.getElementById('tabla_asesores').style.display = 'none';
+                        document.getElementById('sin_reporte').style.display = 'block';
+                    }
+                } else {
+                    alert('Error al cargar reporte: ' + data.message);
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Error de conexión');
+            }
+        }
+
+        function formatMoney(amount) {
+            if (amount === undefined || amount === null) return '0';
+            return amount.toLocaleString('es-CO', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        }
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', () => {
+            const hoy = new Date();
+            const mesActual = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}`;
+            document.getElementById('mes').value = mesActual;
+            cargarListaMeses();
+        });
+</script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

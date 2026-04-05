@@ -1,0 +1,287 @@
+/* ============================================
+   ESTILOS PROFESIONALES - CUMPLIR S.A.S
+   Colores corporativos: #0a3d62 (azul oscuro), #1e3799 (azul medio), #60a3bc (azul claro)
+   Acentos: #e55039 (naranja), #78e08f (verde éxito)
+   Fondos: #f5f6fa (gris muy claro), #ffffff (blanco)
+   ============================================ */
+
+/* Importar fuente moderna */
+@import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #eef2f7 100%);
+    color: #2c3e50;
+    min-height: 100vh;
+    line-height: 1.5;
+}
+
+/* ========== SIDEBAR (mantiene estructura pero mejoramos colores) ========== */
+.sidebar {
+    background: linear-gradient(180deg, #0a3d62 0%, #1e3799 100%);
+    box-shadow: 2px 0 20px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar a {
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+}
+
+.sidebar a:hover, .sidebar a.active {
+    background: rgba(255, 255, 255, 0.1);
+    border-left-color: #e55039;
+    color: #fff;
+}
+
+/* ========== TARJETAS (cards) ========== */
+.card {
+    border: none;
+    border-radius: 16px;
+    background: #ffffff;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    margin-bottom: 1.5rem;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    background: transparent;
+    border-bottom: 2px solid #eef2f7;
+    font-weight: 600;
+    color: #0a3d62;
+    padding: 1rem 1.5rem;
+    font-size: 1.1rem;
+}
+
+.card-header.bg-primary, .card-header.bg-success, .card-header.bg-info, .card-header.bg-warning, .card-header.bg-danger {
+    background: linear-gradient(90deg, #0a3d62 0%, #1e3799 100%) !important;
+    color: white;
+    border-radius: 16px 16px 0 0;
+}
+
+/* ========== BOTONES ========== */
+.btn {
+    border-radius: 40px;
+    padding: 0.5rem 1.2rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    letter-spacing: 0.3px;
+}
+
+.btn-primary {
+    background: linear-gradient(90deg, #1e3799, #0a3d62);
+    border: none;
+    box-shadow: 0 2px 6px rgba(30,55,153,0.3);
+}
+.btn-primary:hover {
+    background: linear-gradient(90deg, #0a2d7a, #072c4a);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 12px rgba(30,55,153,0.4);
+}
+
+.btn-success {
+    background: linear-gradient(90deg, #38ada9, #079992);
+    border: none;
+}
+.btn-warning {
+    background: linear-gradient(90deg, #e58e26, #f39c12);
+    border: none;
+    color: #2c3e50;
+}
+.btn-danger {
+    background: linear-gradient(90deg, #e55039, #c0392b);
+    border: none;
+}
+.btn-outline-light {
+    border: 1px solid rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(4px);
+}
+.btn-outline-light:hover {
+    background: rgba(255,255,255,0.2);
+    border-color: white;
+}
+
+/* ========== TABLAS ========== */
+.table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+}
+.table thead th {
+    background: #0a3d62;
+    color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    padding: 12px 10px;
+    border-bottom: none;
+}
+.table tbody tr {
+    transition: background 0.2s;
+}
+.table tbody tr:hover {
+    background: #f0f7ff;
+}
+.table td, .table th {
+    vertical-align: middle;
+    padding: 12px 10px;
+    border-top: 1px solid #e9ecef;
+}
+
+/* Tabla responsive con scroll */
+.table-responsive {
+    border-radius: 16px;
+    overflow: auto;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* ========== FORMULARIOS ========== */
+.form-control, .form-select {
+    border-radius: 12px;
+    border: 1px solid #dfe6e9;
+    padding: 0.6rem 1rem;
+    transition: all 0.2s;
+}
+.form-control:focus, .form-select:focus {
+    border-color: #1e3799;
+    box-shadow: 0 0 0 3px rgba(30,55,153,0.2);
+    outline: none;
+}
+.form-label {
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-bottom: 0.4rem;
+    color: #2c3e50;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+/* ========== PESTAÑAS (tabs) ========== */
+.nav-tabs .nav-link {
+    border: none;
+    color: #7f8c8d;
+    font-weight: 500;
+    padding: 0.7rem 1.2rem;
+    border-radius: 30px;
+    margin-right: 8px;
+    transition: all 0.2s;
+}
+.nav-tabs .nav-link.active {
+    background: #1e3799;
+    color: white;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.nav-tabs .nav-link:hover:not(.active) {
+    background: #eef2f7;
+    color: #0a3d62;
+}
+
+/* ========== TARJETAS DE MÉTRICAS (Dashboard) ========== */
+.card-saldo {
+    background: linear-gradient(135deg, #1e3799 0%, #0a3d62 100%);
+    color: white;
+    border: none;
+}
+.card-saldo .card-title, .card-saldo .text-muted {
+    color: rgba(255,255,255,0.8) !important;
+}
+.card-saldo h3, .card-saldo h2, .card-saldo .display-6 {
+    color: white;
+}
+.bg-light.border-0 {
+    background: rgba(255,255,255,0.9) !important;
+    backdrop-filter: blur(2px);
+}
+
+/* ========== BADGES ========== */
+.badge {
+    padding: 6px 12px;
+    font-weight: 500;
+    border-radius: 40px;
+    letter-spacing: 0.3px;
+}
+.badge.bg-success {
+    background: linear-gradient(90deg, #38ada9, #079992);
+}
+.badge.bg-danger {
+    background: linear-gradient(90deg, #e55039, #c0392b);
+}
+.badge.bg-warning {
+    background: linear-gradient(90deg, #f39c12, #e67e22);
+    color: #2c3e50;
+}
+.badge.bg-info {
+    background: linear-gradient(90deg, #60a3bc, #3b78a5);
+}
+
+/* ========== MODALES ========== */
+.modal-content {
+    border-radius: 24px;
+    border: none;
+    box-shadow: 0 25px 40px rgba(0,0,0,0.2);
+}
+.modal-header {
+    background: linear-gradient(90deg, #0a3d62, #1e3799);
+    color: white;
+    border-radius: 24px 24px 0 0;
+}
+.modal-header .btn-close {
+    filter: brightness(0) invert(1);
+}
+
+/* ========== ALERTAS (mensajes flotantes) ========== */
+.alert {
+    border-radius: 16px;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+.alert-success {
+    background: linear-gradient(90deg, #d4f1f9, #e0f7fa);
+    color: #0a3d62;
+}
+.alert-danger {
+    background: linear-gradient(90deg, #ffe5e5, #ffd6d6);
+    color: #c0392b;
+}
+
+/* ========== ANIMACIONES ========== */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.modulo-active {
+    animation: fadeInUp 0.4s ease-out;
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 70px;
+        overflow-x: hidden;
+    }
+    .sidebar a span {
+        display: none;
+    }
+    .main-content {
+        margin-left: 70px;
+    }
+    .card-header {
+        padding: 0.8rem 1rem;
+    }
+    .btn {
+        padding: 0.3rem 0.8rem;
+        font-size: 0.8rem;
+    }
+}

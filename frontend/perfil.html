@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil - Cumplir S.A.S</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/estilos.css">
+    <link rel="icon" href="data:,">
+    <style>
+        body { background-color: #f4f6f9; }
+        .card-header { background-color: #2c3e50; color: white; }
+        .btn-logout { background-color: #dc3545; border-color: #dc3545; }
+        .btn-logout:hover { background-color: #bb2d3b; }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="row">
+            <!-- Columna izquierda: Perfil y edición -->
+            <div class="col-md-4">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h5><i class="fas fa-user-circle"></i> Mi Perfil</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Nombre:</strong> <span id="perfil_nombre"></span></p>
+                        <p><strong>Usuario:</strong> <span id="perfil_username"></span></p>
+                        <p><strong>Rol:</strong> <span id="perfil_role"></span></p>
+                        <p><strong>Email:</strong> <span id="perfil_email"></span></p>
+                        <p><strong>Teléfono:</strong> <span id="perfil_telefono"></span></p>
+                        <hr>
+                        <h6>Editar Perfil</h6>
+                        <form id="updateForm">
+                            <div class="mb-2">
+                                <label class="form-label">Email</label>
+                                <input type="email" id="email" class="form-control" placeholder="correo@ejemplo.com">
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">Teléfono</label>
+                                <input type="text" id="telefono" class="form-control" placeholder="Número de contacto">
+                            </div>
+                            <button type="submit" class="btn btn-sm btn-primary">Actualizar</button>
+                        </form>
+                        <hr>
+                        <button id="logout_btn" class="btn btn-danger w-100">Cerrar Sesión</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Columna derecha: Actividad (pestañas) -->
+            <div class="col-md-8">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h5><i class="fas fa-calendar-day"></i> Actividad de Hoy</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="nav nav-tabs" id="myTab" role="tablist">
+                            <li class="nav-item">
+                                <button class="nav-link active" id="gestiones-tab" data-bs-toggle="tab" data-bs-target="#gestiones" type="button">Gestiones Realizadas</button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link" id="acuerdos-tab" data-bs-toggle="tab" data-bs-target="#acuerdos" type="button">Acuerdos Creados</button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link" id="pagos-tab" data-bs-toggle="tab" data-bs-target="#pagos" type="button">Historial de Pagos</button>
+                            </li>
+                        </ul>
+                        <div class="tab-content mt-3">
+                            <div class="tab-pane fade show active" id="gestiones">
+                                <div id="lista_gestiones_hoy" style="max-height: 400px; overflow-y: auto;">
+                                    <p class="text-muted">Cargando...</p>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="acuerdos">
+                                <div id="lista_acuerdos_hoy" style="max-height: 400px; overflow-y: auto;">
+                                    <p class="text-muted">Cargando...</p>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="pagos">
+                                <div id="lista_pagos" style="max-height: 400px; overflow-y: auto;">
+                                    <p class="text-muted">Cargando...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mt-3 text-center">
+            <a href="index.html" class="btn btn-secondary">Volver al Inicio</a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Verificar sesión
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+            window.location.href = '/login.html';
+        }
+
+        // Función para peticiones autenticadas
+        async function fetchWithAuth(url, options = {}) {
+            const token = localStorage.getItem('access_token');
+            if (!token) {
+                window.location.href = '/login.html';
+                return;
+            }
+            options.headers = {
+                ...options.headers,
+                'Authorization': `Bearer ${token}`
+            };
+            const response = await fetch(url, options);
+            if (response.status === 401) {
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('user');
+                window.location.href = '/login.html';
+            }
+            return response;
+        }
+
+        // Formatear moneda
+        function formatMoney(amount) {
+            if (amount === undefined || amount === null) return '0';
+            return amount.toLocaleString('es-CO', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        }
+
+        // Cargar perfil y actividad del día
+        async function cargarPerfil() {
+            const resp = await fetchWithAuth('/perfil');
+            const data = await resp.json();
+            if (resp.ok) {
+                // Datos personales
+                document.getElementById('perfil_nombre').innerText = data.user.nombre_completo;
+                document.getElementById('perfil_username').innerText = data.user.username;
+                document.getElementById('perfil_role').innerText = data.user.role;
+                document.getElementById('perfil_email').innerText = data.user.email || 'No registrado';
+                document.getElementById('perfil_telefono').innerText = data.user.telefono || 'No registrado';
+                // Pre-cargar campos de edición
+                document.getElementById('email').value = data.user.email || '';
+                document.getElementById('telefono').value = data.user.telefono || '';
+
+                // Gestiones de hoy
+                const gestionesDiv = document.getElementById('lista_gestiones_hoy');
+                if (data.gestiones_hoy && data.gestiones_hoy.length > 0) {
+                    let html = '<ul class="list-group">';
+                    data.gestiones_hoy.forEach(g => {
+                        const fecha = new Date(g.fecha_gestion).toLocaleTimeString('es-CO');
+                        html += `
+                            <li class="list-group-item">
+                                <strong>${g.canal}</strong> - ${fecha}<br>
+                                <span class="badge bg-primary">${g.estado_promesa}</span>
+                                <p class="mt-1 mb-0">${g.observacion || ''}</p>
+                            </li>
+                        `;
+                    });
+                    html += '</ul>';
+                    gestionesDiv.innerHTML = html;
+                } else {
+                    gestionesDiv.innerHTML = '<p class="text-muted">No has registrado gestiones hoy.</p>';
+                }
+
+                // Acuerdos de hoy
+                const acuerdosDiv = document.getElementById('lista_acuerdos_hoy');
+                if (data.acuerdos_hoy && data.acuerdos_hoy.length > 0) {
+                    let html = '<ul class="list-group">';
+                    data.acuerdos_hoy.forEach(a => {
+                        html += `
+                            <li class="list-group-item">
+                                <strong>${a.rol} - ${a.nombre_rol}</strong><br>
+                                Monto: $${a.monto_acordado.toLocaleString()} - Cuotas: ${a.numero_cuotas}<br>
+                                <small>Primer pago: ${new Date(a.fecha_primera_cuota).toLocaleDateString('es-CO')}</small>
+                            </li>
+                        `;
+                    });
+                    html += '</ul>';
+                    acuerdosDiv.innerHTML = html;
+                } else {
+                    acuerdosDiv.innerHTML = '<p class="text-muted">No has creado acuerdos hoy.</p>';
+                }
+
+                // Cargar historial de pagos del asesor
+                cargarPagos(data.user.asesor_id);
+            }
+        }
+
+        // Cargar historial de pagos del asesor
+        async function cargarPagos(asesorId) {
+            const divPagos = document.getElementById('lista_pagos');
+            if (!divPagos) return;
+            try {
+                const resp = await fetchWithAuth(`/historial_pagos_asesor/${asesorId}`);
+                const data = await resp.json();
+                if (resp.ok && data.status === "success") {
+                    if (data.pagos && data.pagos.length > 0) {
+                        let html = '<ul class="list-group">';
+                        data.pagos.forEach(p => {
+                            const fechaPago = new Date(p.fecha_pago).toLocaleDateString('es-CO');
+                            const registro = new Date(p.fecha_registro).toLocaleString('es-CO');
+                            html += `
+                                <li class="list-group-item">
+                                    <div class="d-flex justify-content-between">
+                                        <strong>$${p.monto_pago.toLocaleString()}</strong>
+                                        <span class="badge bg-secondary">${p.tipo_pago}</span>
+                                    </div>
+                                    <small>Cliente: ${p.cedula_cliente}</small><br>
+                                    <small>Fecha pago: ${fechaPago} | Registrado: ${registro}</small><br>
+                                    <small>Referencia: ${p.referencia || '—'}</small>
+                                    <p class="mt-1 mb-0 small">${p.observacion || ''}</p>
+                                </li>
+                            `;
+                        });
+                        html += '</ul>';
+                        divPagos.innerHTML = html;
+                    } else {
+                        divPagos.innerHTML = '<p class="text-muted">No hay pagos registrados por ti.</p>';
+                    }
+                } else {
+                    divPagos.innerHTML = '<p class="text-danger">Error al cargar pagos.</p>';
+                }
+            } catch (error) {
+                console.error("Error cargando pagos:", error);
+                divPagos.innerHTML = '<p class="text-danger">Error de conexión.</p>';
+            }
+        }
+
+        // Actualizar perfil
+        document.getElementById('updateForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const telefono = document.getElementById('telefono').value;
+            const resp = await fetchWithAuth('/perfil', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, telefono })
+            });
+            const data = await resp.json();
+            if (resp.ok) {
+                alert('Perfil actualizado');
+                // Recargar los datos mostrados
+                cargarPerfil();
+                // Actualizar el objeto user en localStorage
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                user.email = email;
+                user.telefono = telefono;
+                localStorage.setItem('user', JSON.stringify(user));
+            } else {
+                alert('Error: ' + (data.detail || data.message));
+            }
+        });
+
+        // Cerrar sesión
+        document.getElementById('logout_btn').addEventListener('click', () => {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('user');
+            window.location.href = '/login.html';
+        });
+
+        // Inicializar
+        cargarPerfil();
+    </script>
+</body>
+</html>

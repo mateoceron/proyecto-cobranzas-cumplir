@@ -1,0 +1,35 @@
+# Entorno virtual
+venv/
+env/
+ENV/
+
+# Bases de datos locales (Docker volumes)
+postgres_data/
+mongo_data/
+
+# Archivos de Python
+__pycache__/
+*.py[cod]
+*.so
+.Python
+
+# Variables de entorno
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+
+# Archivos de editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Archivos temporales de Docker
+docker-compose.override.yml
