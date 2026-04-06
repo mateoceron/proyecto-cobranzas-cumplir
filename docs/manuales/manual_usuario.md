@@ -265,14 +265,4 @@ Desde el menú **ACUERDOS**:
 | Las alertas no aparecen | No se programó fecha/hora al guardar gestión | Asegúrese de llenar ambos campos (fecha y hora) antes de guardar. |
 | El reporte mensual no muestra datos | No hay acuerdos/gestiones en el mes seleccionado | Pruebe con otro mes o genere un nuevo reporte. |
 
----
 
-## Anexos
-
-- **Glosario de términos**: Decil, SPEI, ACID, JWT.
-- **Soporte técnico**: Para incidencias no resueltas, enviar correo a `soporte@cumplirsas.com` (ejemplo).
-
----
-
-
-EOF
